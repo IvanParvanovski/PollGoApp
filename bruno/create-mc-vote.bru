@@ -1,0 +1,23 @@
+meta {
+  name: create-mc-vote
+  type: http
+  seq: 7
+}
+
+post {
+  url: http://localhost:8080/votes/
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "id": "123e4567-e89b-12d3-a456-426614174000",
+    "answerIds": [
+      "123e4567-e89b-12d3-a456-426614174001",
+      "123e4567-e89b-12d3-a456-426614174002",
+      "123e4567-e89b-12d3-a456-426614174003"
+    ],
+    "pollId": "123e4567-e89b-12d3-a456-426614174004"
+  }
+}
