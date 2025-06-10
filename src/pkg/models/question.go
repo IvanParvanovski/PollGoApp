@@ -13,9 +13,9 @@ type Question struct {
 	Id              uuid.UUID    `json:"id"`
 	Description     string       `json:"description"`
 	PossibleAnswers []Answer     `json:"possibleAnswers"`
-	QuestionType    QuestionType `json:"questionType"`
+	QuestionType    QuestionType `json:"type"`
 
-	MultipleChoice *MultipleChoice
+	MultipleChoice *MultipleChoice `json:"multipleChoice,omitempty"`
 }
 
 type MultipleChoice struct {
