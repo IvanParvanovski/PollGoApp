@@ -5,5 +5,5 @@ import "github.com/google/uuid"
 type Poll struct {
 	Id        uuid.UUID
 	Title     string
-	Questions QuestionInterface
+	Question QuestionInterface
 }
