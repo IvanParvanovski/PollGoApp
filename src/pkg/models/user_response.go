@@ -1,10 +1,11 @@
-package models 
+package models
+
+import "github.com/google/uuid"
 
 type UserResponse struct {
-	Id           uint32
-	SubmissionId uint32
-	QuestionId   uint32
-	AnswerIds    []uint32
-	PollId       uint32
+	Id         uuid.UUID
+	QuestionId uuid.UUID
+	AnswerIds  []uuid.UUID
+	PollId     uuid.UUID
 }
 

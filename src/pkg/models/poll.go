@@ -1,7 +1,9 @@
 package models
 
+import "github.com/google/uuid"
+
 type Poll struct {
-	Id        uint32
+	Id        uuid.UUID
 	Title     string
-	Questions []QuestionInterface
+	Questions QuestionInterface
 }

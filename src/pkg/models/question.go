@@ -1,5 +1,7 @@
 package models
 
+import "github.com/google/uuid"
+
 type QuestionInterface interface {
 	GetQuestion() Question
 }
@@ -12,9 +14,8 @@ func (s SingleChoice) GetQuestion() Question {
 }
 
 type Question struct {
-	Id              uint32
+	Id              uuid.UUID
 	Description     string
-	Required        bool
 	PossibleAnswers []Answer
 }
 

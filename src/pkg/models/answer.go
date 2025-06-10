@@ -1,7 +1,11 @@
 package models
 
+import (
+	"github.com/google/uuid"
+)
+
 
 type Answer struct {
-	Id          uint32
+	Id          uuid.UUID
 	Description string
 }
