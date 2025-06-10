@@ -1,0 +1,21 @@
+meta {
+  name: create-sc-vote
+  type: http
+  seq: 8
+}
+
+post {
+  url: http://localhost:8080/votes/
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "id": "123e4567-e89b-12d3-a456-426614174006",
+    "answerIds": [
+      "123e4567-e89b-12d3-a456-426614174007"
+    ],
+    "pollId": "123e4567-e89b-12d3-a456-426614174009"
+  }
+}

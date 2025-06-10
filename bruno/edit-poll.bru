@@ -1,0 +1,17 @@
+meta {
+  name: edit-poll
+  type: http
+  seq: 5
+}
+
+patch {
+  url: http://localhost:8080/polls/f00d1234-1a2b-4c3d-9e8f-123456789abc
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+      "title": "Hello World !!!"
+  }
+}
