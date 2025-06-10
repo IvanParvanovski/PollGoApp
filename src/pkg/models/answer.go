@@ -6,6 +6,6 @@ import (
 
 
 type Answer struct {
-	Id          uuid.UUID
-	Description string
+	Id          uuid.UUID `json:"id"`
+	Description string	  `json:"description"`
 }

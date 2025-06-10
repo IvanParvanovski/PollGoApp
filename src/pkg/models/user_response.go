@@ -3,9 +3,9 @@ package models
 import "github.com/google/uuid"
 
 type UserResponse struct {
-	Id         uuid.UUID
-	QuestionId uuid.UUID
-	AnswerIds  []uuid.UUID
-	PollId     uuid.UUID
+	Id         uuid.UUID	`json:"id"`
+	QuestionId uuid.UUID	`json:"questionId"`
+	AnswerIds  []uuid.UUID	`json:"answerIds"`
+	PollId     uuid.UUID	`json:"pollId"`
 }
 

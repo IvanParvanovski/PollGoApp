@@ -1,9 +1,15 @@
 package models
 
-import "github.com/google/uuid"
+import (
+	"github.com/google/uuid"
+)
 
 type Poll struct {
-	Id        uuid.UUID
-	Title     string
-	Question QuestionInterface
+	Id       uuid.UUID         `json:"id"`
+	Title    string            `json:"title"`
+	Question Question 		   `json:"question"`
+}
+
+type PollUpdate struct {
+	Title string			   `json:"title"`
 }

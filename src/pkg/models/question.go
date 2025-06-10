@@ -2,29 +2,23 @@ package models
 
 import "github.com/google/uuid"
 
-type QuestionInterface interface {
-	GetQuestion() Question
-}
+type QuestionType string
 
-func (m MultipleChoice) GetQuestion() Question {
-	return m.Question
-}
-func (s SingleChoice) GetQuestion() Question {
-	return s.Question
-}
+const (
+	SingleChoiceType   QuestionType = "single"
+	MultipleChoiceType QuestionType = "multiple"
+)
 
 type Question struct {
-	Id              uuid.UUID
-	Description     string
-	PossibleAnswers []Answer
+	Id              uuid.UUID    `json:"id"`
+	Description     string       `json:"description"`
+	PossibleAnswers []Answer     `json:"possibleAnswers"`
+	QuestionType    QuestionType `json:"questionType"`
+
+	MultipleChoice *MultipleChoice
 }
 
 type MultipleChoice struct {
-	Question
-
-	MinSelection int
-	MaxSelection int
-}
-type SingleChoice struct {
-	Question
+	MinSelection 	int 		`json:"minSelection"`
+	MaxSelection 	int 		`json:"maxSelection"`
 }
