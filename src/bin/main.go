@@ -1,20 +1,25 @@
 package main
 
 import (
-	"fmt"
-	// "mainapp/pkg/models"
-	"net/http"
+	"github.com/gin-gonic/gin"
+	"mainapp/pkg/handlers"
 )
 
-func homeHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "Welcome to the homepage!")
-}
 
 func main() {
-	router := http.NewServeMux()
-	
-	router.HandleFunc("/", homeHandler)
-	http.ListenAndServe(":8080", nil)
+	router := gin.Default()
 
-	fmt.Println("Success ", router)
+	// Posts endpoints
+	router.GET("/polls", handlers.ListAllPolls)
+	router.POST("/polls", handlers.CreateNewPoll)
+	router.DELETE("/polls/:id", handlers.DeletePoll)
+	router.PATCH("/polls/:id", handlers.UpdatePoll)
+	
+	// Vote endpoints
+	router.GET("/votes/", handlers.ListAllVotes)
+	router.POST("/votes/", handlers.SubmitVote)
+	router.DELETE("/votes/:id", handlers.DeleteVote)
+	router.GET("/votes/:pollId", handlers.ListPollVotes)
+	
+	router.Run()
 }
