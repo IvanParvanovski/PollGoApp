@@ -3,7 +3,7 @@ package services
 import (
 	"mainapp/pkg/models"
 
-	"github.com/google/uuid"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 var votes []models.UserResponse
@@ -12,7 +12,7 @@ func GetAllVotes() []models.UserResponse  {
 	return votes
 }
 
-func GetPollVotes(pollId uuid.UUID) []models.UserResponse {
+func GetPollVotes(pollId primitive.ObjectID) []models.UserResponse {
 	var pollVotes []models.UserResponse
 
 	for i, v := range votes {
@@ -29,7 +29,7 @@ func AddVote(vote models.UserResponse) error {
 	return nil
 }
 
-func getVoteIndex(id uuid.UUID) int {
+func getVoteIndex(id primitive.ObjectID) int {
 	for i, vote := range votes {
 		if vote.Id == id {
 			return i
@@ -38,7 +38,7 @@ func getVoteIndex(id uuid.UUID) int {
 	return -1
 }
 
-func RemoveVoteById(id uuid.UUID) {
+func RemoveVoteById(id primitive.ObjectID) {
 	voteIndex := getVoteIndex(id)
 
 	if voteIndex == -1 {
