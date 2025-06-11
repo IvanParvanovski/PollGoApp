@@ -8,7 +8,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func ListAllPolls(c *gin.Context) {
@@ -40,9 +40,9 @@ func CreateNewPoll(c *gin.Context) {
 func DeletePoll(c *gin.Context) {
 	id := c.Param("id")
 
-	parsedUUID, _ := uuid.Parse(id)
+	parsedObjectId, _ := primitive.ObjectIDFromHex(id)
 
-	services.RemovePollById(parsedUUID)
+	services.RemovePollById(parsedObjectId)
 
 	c.JSON(http.StatusOK, gin.H{"deleted_poll_id": id})
 }
@@ -50,14 +50,14 @@ func DeletePoll(c *gin.Context) {
 func UpdatePoll(c *gin.Context) {
 	id := c.Param("id")
 	
-	parsedUUID, _ := uuid.Parse(id)
+	parsedObjectId, _ := primitive.ObjectIDFromHex(id)
 	
 	var res models.PollUpdate
 	if err := c.ShouldBindJSON(&res); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	}
 
-	updatedPoll, err := services.EditPollById(parsedUUID, res.Title)
+	updatedPoll, err := services.EditPollById(parsedObjectId, res.Title)
 
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Poll coulndn't be updated"})

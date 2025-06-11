@@ -7,7 +7,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func ListAllVotes(c *gin.Context) {
@@ -19,9 +19,9 @@ func ListAllVotes(c *gin.Context) {
 func ListPollVotes(c *gin.Context) {
 	id := c.Param("pollId")
 
-	parsedUUID, _ := uuid.Parse(id)
+	parsedObjectId, _ := primitive.ObjectIDFromHex(id)
 
-	votes := services.GetPollVotes(parsedUUID)
+	votes := services.GetPollVotes(parsedObjectId)
 
 	c.JSON(http.StatusOK, gin.H{"message": "Vote created", "data": votes})
 }
@@ -48,9 +48,9 @@ func SubmitVote(c *gin.Context) {
 func DeleteVote(c *gin.Context) {
 	id := c.Param("id")
 
-	parsedUUID, _ := uuid.Parse(id)
+	parsedObjectId, _ := primitive.ObjectIDFromHex(id)
 
-	services.RemoveVoteById(parsedUUID)
+	services.RemoveVoteById(parsedObjectId)
 
 	c.JSON(http.StatusOK, gin.H{"deleted_vote_id": id})
 }
