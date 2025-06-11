@@ -1,15 +1,15 @@
 package models
 
 import (
-	"github.com/google/uuid"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type Poll struct {
-	Id       uuid.UUID         `json:"id"`
-	Title    string            `json:"title"`
-	Question Question 		   `json:"question"`
+	Id       primitive.ObjectID `bson:"_id,omitempty" json:"id"`
+	Title    string    			`bson:"title" json:"title"`
+	Question Question  			`bson:"question" json:"question"`
 }
 
 type PollUpdate struct {
-	Title string			   `json:"title"`
+	Title string 				`bson:"title,omitempty" json:"title"`
 }

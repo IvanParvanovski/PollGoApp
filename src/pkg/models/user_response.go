@@ -1,10 +1,9 @@
 package models
 
-import "github.com/google/uuid"
+import ("go.mongodb.org/mongo-driver/bson/primitive")
 
 type UserResponse struct {
-	Id         uuid.UUID	`json:"id"`
-	AnswerIds  []uuid.UUID	`json:"answerIds"`
-	PollId     uuid.UUID	`json:"pollId"`
+	Id        primitive.ObjectID   `bson:"_id,omitempty" json:"id"`
+	AnswerIds []primitive.ObjectID `bson:"answerIds" json:"answerIds"`
+	PollId    primitive.ObjectID   `bson:"pollId" json:"pollId"`
 }
-

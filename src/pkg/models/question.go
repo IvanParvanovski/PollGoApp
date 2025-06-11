@@ -1,6 +1,8 @@
 package models
 
-import "github.com/google/uuid"
+import (
+	"go.mongodb.org/mongo-driver/bson/primitive"
+)
 
 type QuestionType string
 
@@ -10,15 +12,15 @@ const (
 )
 
 type Question struct {
-	Id              uuid.UUID    `json:"id"`
-	Description     string       `json:"description"`
-	PossibleAnswers []Answer     `json:"possibleAnswers"`
-	QuestionType    QuestionType `json:"type"`
+	Id              primitive.ObjectID    `bson:"_id,omitempty" json:"id"`
+	Description     string       `bson:"description" json:"description"`
+	PossibleAnswers []Answer     `bson:"possibleAnswers" json:"possibleAnswers"`
+	QuestionType    QuestionType `bson:"type" json:"type"`
 
-	MultipleChoice *MultipleChoice `json:"multipleChoice,omitempty"`
+	MultipleChoice *MultipleChoice `bson:"multipleChoice,omitempty" json:"multipleChoice,omitempty"`
 }
 
 type MultipleChoice struct {
-	MinSelection 	int 		`json:"minSelection"`
-	MaxSelection 	int 		`json:"maxSelection"`
+	MinSelection 	int 		`bson:"minSelection" json:"minSelection"`
+	MaxSelection 	int 		`bson:"maxSelection" json:"maxSelection"`
 }

@@ -1,11 +1,11 @@
 package models
 
 import (
-	"github.com/google/uuid"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 
 type Answer struct {
-	Id          uuid.UUID `json:"id"`
-	Description string	  `json:"description"`
+	Id          primitive.ObjectID  `bson:"_id" json:"id"`
+	Description string	  		    `bson:"description" json:"description"`
 }
