@@ -1,12 +1,16 @@
 package main
 
 import (
-	"github.com/gin-gonic/gin"
+	"mainapp/pkg/global"
 	"mainapp/pkg/handlers"
+	"github.com/gin-gonic/gin"
 )
 
 
 func main() {
+	globals.Init("mongodb://localhost:27017/")
+	defer globals.DeInit()
+
 	router := gin.Default()
 
 	// Posts endpoints
