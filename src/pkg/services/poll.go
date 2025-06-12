@@ -12,9 +12,9 @@ import (
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/v2/bson"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
 
-var allPolls []models.Poll
 
 
 func GetAllPolls() []models.Poll {
@@ -45,18 +45,6 @@ func GetAllPolls() []models.Poll {
 	return allPolls
 }
 
-func findPollIndexById(id primitive.ObjectID) int {
-	for i, poll := range allPolls {
-		if poll.Id == id {
-			return i
-		}
-	}
-
-	return -1
-}
-
-// Poll creation and modification
-
 func AddPoll(poll models.Poll) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -83,26 +71,42 @@ func AddPoll(poll models.Poll) error {
 }
 
 func RemovePollById(id primitive.ObjectID) error {
-	pollIndex := findPollIndexById(id)
-	
-	if pollIndex == -1 {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	collection := globals.MONGO_DB.Collection("polls")
+
+	res, err := collection.DeleteOne(ctx, bson.M{"_id": id})
+
+	if err != nil {
+		return err
+	}
+	if res.DeletedCount == 0 {
 		return errors.New("poll not found")
 	}
 
-	allPolls = append(allPolls[:pollIndex], allPolls[pollIndex + 1:]...)
 	return nil
 }
 
 func EditPollById(id primitive.ObjectID, title string) (models.Poll, error) {
-	index := findPollIndexById(id)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	
+	collection := globals.MONGO_DB.Collection("polls")
 
-	if index == -1 {
-		return models.Poll{}, errors.New("poll not found")
+	filter := bson.M{"_id": id}
+	update := bson.M{"$set": bson.M{"title": title}}
+
+	opts := options.FindOneAndUpdate().SetReturnDocument(options.After).SetUpsert(false)
+
+	var updatedPoll models.Poll
+	err := collection.FindOneAndUpdate(ctx, filter, update, opts).Decode(&updatedPoll)
+
+	if err != nil {
+		return models.Poll{}, err
 	}
 
-	currentPoll := &allPolls[index]
-	currentPoll.Title = title
+	return updatedPoll, nil
 
-	return *currentPoll, nil 
 }
 
