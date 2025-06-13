@@ -24,14 +24,14 @@ func main() {
 		// Posts endpoints
 		api.GET("/polls", handlers.ListAllPolls)
 		api.POST("/polls", handlers.CreateNewPoll)
-		api.PATCH("/polls/:id", handlers.DeletePoll)
-		api.DELETE("/polls/:id", handlers.UpdatePoll)
+		api.PATCH("/polls/:id", handlers.UpdatePoll)
+		api.DELETE("/polls/:id", handlers.DeletePoll)
 
 		// Vote endpoints
 		api.GET("/votes/", handlers.ListAllVotes)
 		api.POST("/votes/", handlers.SubmitVote)
-		api.GET("/votes/:id", handlers.DeleteVote)
-		api.DELETE("/votes/:pollId", handlers.ListPollVotes)
+		api.DELETE("/votes/:id", handlers.DeleteVote)
+		api.GET("/votes/user", handlers.ListUserVotes)
 	}
 
 	router.Run()

@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"errors"
 	"fmt"
 	"mainapp/pkg/auth"
 	"mainapp/pkg/models"
@@ -10,6 +11,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -85,7 +87,7 @@ func RegisterHandler(c *gin.Context) {
 		return
 	}
 
-	err := services.SaveUser(input.Username, input.Password)
+	user, err := services.SaveUser(input.Username, input.Password)
 	
 	if err != nil {
 		// user already exists
@@ -93,7 +95,7 @@ func RegisterHandler(c *gin.Context) {
 		return
 	}
 
-	tokenString, err := auth.CreateToken(input.Username)
+	tokenString, err := auth.CreateToken(input.Username, user.Id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "could not generate token"})
 		return
@@ -142,7 +144,7 @@ func LoginHandler(c *gin.Context) {
         return
     }
 	
-	tokenString, err := auth.CreateToken(userInput.Username)
+	tokenString, err := auth.CreateToken(user.Username, user.Id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"erorr": "could not generate token"})
 		return
@@ -180,3 +182,33 @@ func LogoutHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "logout successful"})
 }
 
+func GetUserIdFromCookie(c *gin.Context) (primitive.ObjectID, error) {
+	// 1) Decode the JWT from the cookie
+	tokenString, err := c.Cookie("jwt")
+	if err != nil {
+		return primitive.ObjectID{}, errors.New("no jwt cookie present")
+	}
+
+	// 2) Validate & parse it
+	token, err := auth.ValidateToken(tokenString)
+	if err != nil {
+		return primitive.ObjectID{}, errors.New("invalid token")
+	}
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok || !token.Valid {
+		return primitive.ObjectID{}, errors.New("bad token claims")
+	}
+
+	// 3) Extract the user_id claim (assumes you stored it as hex)
+	uidHex, ok := claims["userId"].(string)
+	if !ok {
+		return primitive.ObjectID{}, errors.New("userId missing from token")
+	}
+
+	userID, err := primitive.ObjectIDFromHex(uidHex)
+	if err != nil {
+		return primitive.ObjectID{}, errors.New("malformed userId in token")
+	}
+	
+	return userID, nil
+}

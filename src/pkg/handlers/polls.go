@@ -1,8 +1,6 @@
 package handlers
 
 import (
-	"fmt"
-	"log"
 	"mainapp/pkg/models"
 	"mainapp/pkg/services"
 	"net/http"
@@ -18,6 +16,13 @@ func ListAllPolls(c *gin.Context) {
 }
 
 func CreateNewPoll(c *gin.Context) {
+	userID, err := GetUserIdFromCookie(c)
+
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
+
 	var req models.Poll
 
 	if err := c.BindJSON(&req); err != nil {
@@ -26,30 +31,51 @@ func CreateNewPoll(c *gin.Context) {
     }
 
 	poll := &req
+	poll.UserId = userID
 
-	err := services.AddPoll(*poll)
+	savedPoll, err := services.AddPoll(*poll)
+
 	if err != nil {
-		fmt.Println()
-		log.Println(err)
+		c.JSON(http.StatusConflict, gin.H{"error": err.Error()})
+		return 
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Poll created", "data": req})
+	c.JSON(http.StatusOK, gin.H{"message": "Poll created", "data": savedPoll})
 }
 
 
 func DeletePoll(c *gin.Context) {
+	userID, err := GetUserIdFromCookie(c)
+	
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
+
 	id := c.Param("id")
 
 	parsedObjectId, _ := primitive.ObjectIDFromHex(id)
 
-	services.RemovePollById(parsedObjectId)
+	err = services.RemovePollById(parsedObjectId, userID)
+
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		return
+	}
 
 	c.JSON(http.StatusOK, gin.H{"deleted_poll_id": id})
 }
 
 func UpdatePoll(c *gin.Context) {
-	id := c.Param("id")
+	userID, err := GetUserIdFromCookie(c)
 	
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
+
+	id := c.Param("id")
+
 	parsedObjectId, _ := primitive.ObjectIDFromHex(id)
 	
 	var res models.PollUpdate
@@ -57,10 +83,11 @@ func UpdatePoll(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	}
 
-	updatedPoll, err := services.EditPollById(parsedObjectId, res.Title)
+	updatedPoll, err := services.EditPollById(parsedObjectId, userID, res.Title)
 
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Poll coulndn't be updated"})
+		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{

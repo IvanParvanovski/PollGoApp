@@ -3,7 +3,6 @@ package services
 import (
 	"context"
 	"errors"
-	"fmt"
 	globals "mainapp/pkg/global"
 	"mainapp/pkg/models"
 	"time"
@@ -14,7 +13,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func SaveUser(username, password string) error {
+func SaveUser(username, password string) (*models.User, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -23,25 +22,17 @@ func SaveUser(username, password string) error {
 	filter := bson.M{"username": username}
 	count, err := collection.CountDocuments(ctx, filter)
 
-	fmt.Println()
-	fmt.Println()
-	fmt.Println()
-	fmt.Printf("%v, %T", count, count)
-	fmt.Println()
-	fmt.Println()
-	fmt.Println()
-
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if count > 0 {
-		return errors.New("username already taken")
+		return nil, errors.New("username already taken")
 	}
 
 	hashedPwd, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	user := models.User{
@@ -51,7 +42,7 @@ func SaveUser(username, password string) error {
 	}
 
 	_, err = collection.InsertOne(ctx, user)
-	return err
+	return &user, err
 }
 
 func FetchUser(username string) (*models.User, error) {

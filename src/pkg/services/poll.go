@@ -45,36 +45,66 @@ func GetAllPolls() []models.Poll {
 	return allPolls
 }
 
-func AddPoll(poll models.Poll) error {
+func AddPoll(poll models.Poll) (models.Poll, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	
 	collection := globals.MONGO_DB.Collection("polls")
+
+	// check for existing
+	count, err := collection.CountDocuments(ctx, bson.M{"_id": poll.Id})
+	if err != nil {
+		return models.Poll{}, err
+	}
+	if count > 0 {
+		return models.Poll{}, errors.New("poll already exists")
+	}
 
 	// generate a new ObjectID if none provided
 	if poll.Id.IsZero() {
 		poll.Id = primitive.NewObjectID()
 	}
+	if poll.Question.Id.IsZero() {
+		poll.Question.Id = primitive.NewObjectID()
+	}
+	for i := range poll.Question.PossibleAnswers {
+		if poll.Question.PossibleAnswers[i].Id.IsZero() {
+			poll.Question.PossibleAnswers[i].Id = primitive.NewObjectID()
+		}
+		
+		fmt.Println()
+	}
 
-	// check for existing
-	count, err := collection.CountDocuments(ctx, bson.M{"_id": poll.Id})
-	if err != nil {
-		return err
-	}
-	if count > 0 {
-		return errors.New("already exists")
-	}
 
 	_, err = collection.InsertOne(ctx, poll)
 	
-	return err
+	return poll, err
 }
 
-func RemovePollById(id primitive.ObjectID) error {
+
+func RemovePollById(id, userID primitive.ObjectID) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	collection := globals.MONGO_DB.Collection("polls")
+
+	count, err := collection.CountDocuments(ctx, bson.M{"_id": id})
+	if err != nil {
+		return err
+	}
+	if count == 0 {
+		return errors.New("such a poll does not exist")
+	}
+
+	var poll models.Poll
+	err = collection.FindOne(ctx, bson.M{"_id": id}).Decode(&poll)
+	
+	if err != nil {
+		return err
+	}
+	if poll.UserId != userID {
+		return errors.New("the authenticated user is not an owner of this object")
+	}
 
 	res, err := collection.DeleteOne(ctx, bson.M{"_id": id})
 
@@ -88,11 +118,27 @@ func RemovePollById(id primitive.ObjectID) error {
 	return nil
 }
 
-func EditPollById(id primitive.ObjectID, title string) (models.Poll, error) {
+func EditPollById(id, userID primitive.ObjectID, title string) (models.Poll, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	
 	collection := globals.MONGO_DB.Collection("polls")
+
+	count, _ := collection.CountDocuments(ctx, bson.M{"_id": id})	
+	
+	if count == 0 {
+		return models.Poll{}, errors.New("such a poll does not exist")
+	}
+
+	var poll models.Poll
+	err := collection.FindOne(ctx, bson.M{"_id": id}).Decode(&poll)
+	
+	if err != nil {
+		return models.Poll{}, err
+	}
+	if poll.UserId != userID {
+		return models.Poll{}, errors.New("the authenticated user is not an owner of this object")
+	}
 
 	filter := bson.M{"_id": id}
 	update := bson.M{"$set": bson.M{"title": title}}
@@ -100,7 +146,7 @@ func EditPollById(id primitive.ObjectID, title string) (models.Poll, error) {
 	opts := options.FindOneAndUpdate().SetReturnDocument(options.After).SetUpsert(false)
 
 	var updatedPoll models.Poll
-	err := collection.FindOneAndUpdate(ctx, filter, update, opts).Decode(&updatedPoll)
+	err = collection.FindOneAndUpdate(ctx, filter, update, opts).Decode(&updatedPoll)
 
 	if err != nil {
 		return models.Poll{}, err
