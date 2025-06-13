@@ -3,6 +3,7 @@ package main
 import (
 	"mainapp/pkg/global"
 	"mainapp/pkg/handlers"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -13,17 +14,25 @@ func main() {
 
 	router := gin.Default()
 
-	// Posts endpoints
-	router.GET("/polls", handlers.ListAllPolls)
-	router.POST("/polls", handlers.CreateNewPoll)
-	router.DELETE("/polls/:id", handlers.DeletePoll)
-	router.PATCH("/polls/:id", handlers.UpdatePoll)
-	
-	// Vote endpoints
-	router.GET("/votes/", handlers.ListAllVotes)
-	router.POST("/votes/", handlers.SubmitVote)
-	router.DELETE("/votes/:id", handlers.DeleteVote)
-	router.GET("/votes/:pollId", handlers.ListPollVotes)
-	
+	// Auth
+	router.POST("/login", handlers.LoginHandler)
+	router.POST("/register", handlers.RegisterHandler)
+	router.POST("/logout", handlers.LogoutHandler)
+
+	api := router.Group("/api", handlers.AuthMiddleware) 
+	{
+		// Posts endpoints
+		api.GET("/polls", handlers.ListAllPolls)
+		api.POST("/polls", handlers.CreateNewPoll)
+		api.PATCH("/polls/:id", handlers.DeletePoll)
+		api.DELETE("/polls/:id", handlers.UpdatePoll)
+
+		// Vote endpoints
+		api.GET("/votes/", handlers.ListAllVotes)
+		api.POST("/votes/", handlers.SubmitVote)
+		api.GET("/votes/:id", handlers.DeleteVote)
+		api.DELETE("/votes/:pollId", handlers.ListPollVotes)
+	}
+
 	router.Run()
 }
