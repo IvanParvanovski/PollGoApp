@@ -1,0 +1,46 @@
+meta {
+  name: create-new-poll
+  type: http
+  seq: 2
+}
+
+post {
+  url: http://localhost:8080/polls
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "id": "f00d1234-1a2b-4c3d-9e8f-123456789abc",
+    "title": "Favorite Foods",
+    "question": {
+      "type": "multiple",
+      "id": "a1b2c3d4-5e6f-4a7b-8c9d-0123456789ef",
+      "description": "Which of these foods do you enjoy eating?",
+      "possibleAnswers": [
+        {
+          "id": "11111111-2222-4333-8444-555555555555",
+          "description": "Pizza"
+        },
+        {
+          "id": "22222222-3333-4444-8555-666666666666",
+          "description": "Sushi"
+        },
+        {
+          "id": "33333333-4444-4555-8666-777777777777",
+          "description": "Burgers"
+        },
+        {
+          "id": "44444444-5555-4666-8777-888888888888",
+          "description": "Tacos"
+        }
+      ],
+      "multipleChoice": {
+          "minSelection": 1,
+          "maxSelection": 3
+      }
+  
+    }
+  }
+}
